@@ -15,7 +15,7 @@ public class MemberController {
     @Autowired
     MemberService ms;
 
-    @GetMapping
+    @GetMapping("/test")
     public String index(){
         return "<h1>Board Server Test!!</h1>";
     }
