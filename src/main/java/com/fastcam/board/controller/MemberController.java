@@ -15,6 +15,11 @@ public class MemberController {
     @Autowired
     MemberService ms;
 
+    @GetMapping
+    public String index(){
+        return "<h1>Board Server Test!!</h1>";
+    }
+
     @PostMapping("/idcheck")
     public HashMap<String, Object> idcheck( @RequestParam("userid") String userid ){
         HashMap<String, Object> map = new HashMap<String, Object>();

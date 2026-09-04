@@ -1,0 +1,30 @@
+name: Deploy to EC2
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  My-Deploy-Job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: EC2 SSH 접속 및 배포
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          APPLICATION_PROPERTIES: ${{secrets.APPLICATION_YML}}
+        with:
+          host: ${{secrets.EC2_HOST}}
+          username: ${{secrets.EC2_USERNAME}}
+          key: ${{secrets.EC2_PRIVATE_KEY}}
+          envs: APPLICATION_PROPERTIES
+
+          script_stop: true # 아래 script 중 실패하는 명령이 하나라도 있으면 실패로 처리
+          script: |
+            cd /home/ubuntu/CICD01
+            rm -rf src/main/resources/application.yaml
+            git pull origin main
+            echo "$APPLICATION_PROPERTIES" > src/main/resources/application.yaml
+            ./gradlew clean build
+            sudo fuser -k -n tcp 8070 || true  # 기존 실행된 서버 종료
+            #  || true : 8070에 종료시킬 프로세스가 없더라도 에러없이 정상실행
+            nohup java -jar build/libs/*SNAPSHOT.jar > ./output.log 2>&1 &
